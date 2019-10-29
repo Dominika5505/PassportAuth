@@ -5,42 +5,7 @@ const {
 } = require('../validation');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-
-// Login Page
-router.get('/login', (req, res) => res.render('Login'));
-
-router.post('/login', async (req, res) => {
-    let errors = [];
-
-    // Validate
-    const {
-        error
-    } = loginValidation(req.body);
-    if (error) {
-        errors.push({
-            msg: error.details[0].message
-        })
-    }
-
-    const emailExists = await User.findOne({
-        email: req.body.email
-    });
-    if (!emailExists) {
-        errors.push({
-            msg: 'Email isn\'t registered!'
-        });
-    }
-
-    if (errors.length > 0) {
-        res.render('login', {
-            errors,
-            email: req.body.email,
-            password: req.body.password,
-        });
-    } else {
-
-    }
-});
+const passport = require('passport');
 
 // Register Page
 router.get('/register', (req, res) => res.render('register'));
@@ -98,6 +63,24 @@ router.post('/register', async (req, res) => {
             }).catch(err => console.log(err));
     }
 
+});
+
+// Login Page
+router.get('/login', (req, res) => res.render('Login'));
+
+router.post('/login', async (req, res, next) => {
+    passport.authenticate('local', {
+        successRedirect: '/dashboard',
+        failureRedirect: '/users/login',
+        failureFlash: true
+    })(req, res, next);
+});
+
+// Logout Page
+router.get('/logout', (req, res) => {
+    req.logout();
+    req.flash('success_msg', 'You are now logged out');
+    res.redirect('/users/login');
 });
 
 module.exports = router;
