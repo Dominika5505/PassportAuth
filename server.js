@@ -7,6 +7,10 @@ const mongoose = require('mongoose');
 const expressLayouts = require('express-ejs-layouts');
 const flash = require('connect-flash');
 const session = require('express-session');
+const passport = require('passport');
+
+// Passport config
+require('./config/passport')(passport);
 
 // DB Connection
 mongoose.connect(process.env.DB_CONNECTION, {
@@ -29,6 +33,10 @@ app.use(session({
     resave: true,
     saveUninitialized: true
 }));
+
+// Passport Middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Connect flash
 app.use(flash());
