@@ -1,18 +1,50 @@
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
-
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+const expressLayouts = require('express-ejs-layouts');
+const flash = require('connect-flash');
+const session = require('express-session');
 
+// DB Connection
 mongoose.connect(process.env.DB_CONNECTION, {
     useNewUrlParser: true,
     useUnifiedTopology: true
-});
-const db = mongoose.connection;
-db.on('error', error => console.log(error));
-db.once('open', () => console.log('Connected to MongoDB!'));
+}).then(() => console.log('MongoDB connected...')).catch(err => console.log(err));
 
+// EJS
+app.use(expressLayouts);
+app.set('view engine', 'ejs');
+
+// Body parser
+app.use(express.urlencoded({
+    extended: false
+}));
+
+// Express Session
+app.use(session({
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true
+}));
+
+// Connect flash
+app.use(flash());
+
+// Global Vars
+app.use((req, res, next) => {
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    next();
+});
+
+
+// Routers
+app.use('/', require('./routes/index'));
+app.use('/users', require('./routes/users'));
+
+// App listening on port
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

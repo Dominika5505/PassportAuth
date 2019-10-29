@@ -14,6 +14,7 @@
     "nodemon": "^1.19.4"
   },
   "dependencies": {
+    "@hapi/joi": "^16.1.7",
     "bcryptjs": "^2.4.3",
     "connect-flash": "^0.1.1",
     "ejs": "^2.7.1",
